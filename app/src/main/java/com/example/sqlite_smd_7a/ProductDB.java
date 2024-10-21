@@ -2,10 +2,12 @@ package com.example.sqlite_smd_7a;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import androidx.annotation.Nullable;
 
+import java.util.ArrayList;
 
 public class ProductDB {
     public final String DATABASE_NAME = "products_db";
@@ -57,9 +59,31 @@ public class ProductDB {
         return db.update(DATABASE_TABLE_NAME, cv, KEY_ID+"=?", new String[]{id+""});
     }
 
+    public ArrayList<Product> fetchProducts()
+    {
+        SQLiteDatabase readDb = dbHelper.getReadableDatabase();
+        ArrayList<Product> products = new ArrayList<>();
+        String []columns = new String[]{KEY_ID, KEY_TITLE, KEY_DATE, KEY_PRICE};
 
+        Cursor cursor = readDb.query(DATABASE_TABLE_NAME, columns, null, null, null, null, null);
+        if(cursor!=null) {
 
+            int id_index = cursor.getColumnIndex(KEY_ID);
+            int title_index = cursor.getColumnIndex(KEY_TITLE);
+            int date_index = cursor.getColumnIndex(KEY_DATE);
+            int price_index = cursor.getColumnIndex(KEY_PRICE);
+            while (cursor.moveToNext()) {
+                Product p = new Product(cursor.getInt(id_index), cursor.getString(title_index), cursor.getString(date_index),
+                        cursor.getInt(price_index));
+                products.add(p);
+            }
+            cursor.close();
+        }
+        return products;
 
+    }
+
+    
     private class DBHelper extends SQLiteOpenHelper
     {
 
